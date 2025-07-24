@@ -5,8 +5,5 @@
     "fmt": {
         "indentWidth": 4,
         "singleQuote": true
-    },
-    "imports": {
-        "#inputs/": "./inputs/"
     }
 }
