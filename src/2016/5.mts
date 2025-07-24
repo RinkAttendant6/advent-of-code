@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-const findHash = (input: string, start: number) => {
+const findHash = (input: string, start: number): [string, number] => {
     let i = start;
     let hash;
 
@@ -43,9 +43,11 @@ export const part2 = (input: string) => {
     return password.join('');
 };
 
+// deno-coverage-ignore-start
 if (import.meta.main) {
-    const input = await Deno.readTextFile(
-        Deno.args[0] ?? new URL('../../inputs/2016/5.txt', import.meta.url),
-    );
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/5.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
     console.log({ part1: part1(input), part2: part2(input) });
 }
+// deno-coverage-ignore-stop

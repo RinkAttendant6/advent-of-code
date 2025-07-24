@@ -49,9 +49,11 @@ export const part2 = (rawInput: string): string => {
     return result;
 };
 
+// deno-coverage-ignore-start
 if (import.meta.main) {
-    const input = await Deno.readTextFile(
-        Deno.args[0] ?? new URL('../../inputs/2016/6.txt', import.meta.url),
-    );
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/6.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
     console.log({ part1: part1(input), part2: part2(input) });
 }
+// deno-coverage-ignore-stop
