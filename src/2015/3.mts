@@ -1,5 +1,3 @@
-import rawInput from '#inputs/2015/3.txt' with { type: 'text' };
-
 const go = (input: string[]) => {
     let x = 0, y = 0;
     const visited = new Set<string>([`0 0`]);
@@ -26,19 +24,22 @@ const go = (input: string[]) => {
     return visited;
 };
 
-export const part1 = go([...rawInput]).size;
+export const part1 = (input: string) => go([...input]).size;
 
-export const part2 = (() => {
-    const santaInput = [...rawInput].filter((_, idx) => idx % 2 === 0);
-    const roboSantaInput = [...rawInput].filter((_, idx) => idx % 2 === 1);
+export const part2 = (input: string): number => {
+    const santaInput = [...input].filter((_, idx) => idx % 2 === 0);
+    const roboSantaInput = [...input].filter((_, idx) => idx % 2 === 1);
 
     const visited1 = go(santaInput);
     const visited2 = go(roboSantaInput);
 
     const visited = visited1.union(visited2);
     return visited.size;
-})();
+};
 
 if (import.meta.main) {
-    console.log({ part1, part2 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2015/3.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input), part2: part2(input) });
 }

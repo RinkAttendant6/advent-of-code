@@ -1,11 +1,7 @@
-import rawInput from '#inputs/2016/7.txt' with { type: 'text' };
-
-const input = rawInput.split('\n');
-
 const isAbba = (str: string): boolean => /(.)(?!\1)(.)\2\1/.test(str);
 
-export const part1 =
-    input.map((line) => line.split(/\[|\]/)).filter((lineParts) => {
+export const part1 = (input: string) =>
+    input.split('\n').map((line) => line.split(/\[|\]/)).filter((lineParts) => {
         const partsOutside = lineParts.filter((_, k) => k % 2 === 0);
         const partsInside = lineParts.filter((_, k) => k % 2 === 1);
 
@@ -13,5 +9,8 @@ export const part1 =
     }).length;
 
 if (import.meta.main) {
-    console.log({ part1 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2016/7.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input) });
 }

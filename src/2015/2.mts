@@ -1,6 +1,5 @@
-import rawInput from '#inputs/2015/2.txt' with { type: 'text' };
-
-const input = rawInput.split('\n').map((line) => line.split('x').map(Number));
+const normalizeInput = (rawInput: string) =>
+    rawInput.split('\n').map((line) => line.split('x').map(Number));
 
 /**
  * Get the total wrapping paper for a present, including slack
@@ -24,16 +23,21 @@ const determineRibbon = (x: number, y: number, z: number): number => {
     return ribbon + bow;
 };
 
-export const part1 = input.reduce(
-    (sum, [x, y, z]) => sum + determineWrappingPaper(x, y, z),
-    0,
-);
+export const part1 = (input: string): number =>
+    normalizeInput(input).reduce(
+        (sum, [x, y, z]) => sum + determineWrappingPaper(x, y, z),
+        0,
+    );
 
-export const part2 = input.reduce(
-    (sum, [x, y, z]) => sum + determineRibbon(x, y, z),
-    0,
-);
+export const part2 = (input: string): number =>
+    normalizeInput(input).reduce(
+        (sum, [x, y, z]) => sum + determineRibbon(x, y, z),
+        0,
+    );
 
 if (import.meta.main) {
-    console.log({ part1, part2 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2015/2.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input), part2: part2(input) });
 }

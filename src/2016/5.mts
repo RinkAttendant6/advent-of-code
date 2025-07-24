@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import rawInput from '#inputs/2016/5.txt' with { type: 'text' };
 
 const findHash = (input: string, start: number) => {
     let i = start;
@@ -16,7 +15,7 @@ const findHash = (input: string, start: number) => {
     return [hash, i];
 };
 
-export const part1 = ((input: string) => {
+export const part1 = (input: string) => {
     const password: string[] = [];
 
     for (let i = 0; password.length < 8;) {
@@ -26,9 +25,9 @@ export const part1 = ((input: string) => {
     }
 
     return password.join('');
-})(rawInput);
+};
 
-export const part2 = ((input: string) => {
+export const part2 = (input: string) => {
     const password: string[] = Array(8).fill(' ');
 
     for (let i = 0; password.some((char) => char === ' ');) {
@@ -42,8 +41,11 @@ export const part2 = ((input: string) => {
     }
 
     return password.join('');
-})(rawInput);
+};
 
 if (import.meta.main) {
-    console.log({ part1, part2 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2016/5.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input), part2: part2(input) });
 }

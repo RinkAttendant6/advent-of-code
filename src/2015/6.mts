@@ -1,7 +1,3 @@
-import rawInput from '#inputs/2015/6.txt' with { type: 'text' };
-
-const input = rawInput.split('\n');
-
 const re =
     /^(?<instruction>turn on|turn off|toggle) (?<x1>\d+),(?<y1>\d+) through (?<x2>\d+),(?<y2>\d+)$/;
 
@@ -65,16 +61,21 @@ const doPart2 = (input: string[]) => {
     return lights;
 };
 
-export const part1 = doPart1(input).reduce(
-    (sum, row) => sum + row.reduce((acc, v) => acc + v),
-    0,
-);
+export const part1 = (input: string) =>
+    doPart1(input.split('\n')).reduce(
+        (sum, row) => sum + row.reduce((acc, v) => acc + v),
+        0,
+    );
 
-export const part2 = doPart2(input).reduce(
-    (sum, row) => sum + row.reduce((acc, v) => acc + v),
-    0,
-);
+export const part2 = (input: string) =>
+    doPart2(input.split('\n')).reduce(
+        (sum, row) => sum + row.reduce((acc, v) => acc + v),
+        0,
+    );
 
 if (import.meta.main) {
-    console.log({ part1, part2 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2015/6.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input), part2: part2(input) });
 }

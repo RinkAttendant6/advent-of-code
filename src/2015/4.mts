@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import rawInput from '#inputs/2015/4.txt' with { type: 'text' };
 
 /**
  * Finds the MD5 hash that contains a prefix with a given length of zeros
@@ -21,9 +20,12 @@ const findHash = (input: string, zeroPrefixLength: number) => {
     return i;
 };
 
-export const part1 = findHash(rawInput, 5);
-export const part2 = findHash(rawInput, 6);
+export const part1 = (input: string) => findHash(input, 5);
+export const part2 = (input: string) => findHash(input, 6);
 
 if (import.meta.main) {
-    console.log({ part1, part2 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2015/4.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input), part2: part2(input) });
 }

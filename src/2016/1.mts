@@ -1,8 +1,9 @@
-import rawInput from '#inputs/2016/1.txt' with { type: 'text' };
+const normalizeInput = (rawInput: string): string[] =>
+    rawInput.trim().split(', ');
 
-const input = rawInput.trim().split(', ');
+export const part1 = (rawInput: string) => {
+    const input = normalizeInput(rawInput);
 
-export const part1 = ((input) => {
     let direction = 0;
     let x = 0, y = 0;
 
@@ -35,9 +36,10 @@ export const part1 = ((input) => {
     }
 
     return Math.abs(x) + Math.abs(y);
-})(input);
+};
 
-export const part2 = ((input) => {
+export const part2 = (rawInput: string) => {
+    const input = normalizeInput(rawInput);
     let direction = 0;
     let x = 0, y = 0;
     const visited = new Set<string>(['0 0']);
@@ -78,8 +80,11 @@ export const part2 = ((input) => {
     }
 
     return Math.abs(x) + Math.abs(y);
-})(input);
+};
 
 if (import.meta.main) {
-    console.log({ part1, part2 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2016/1.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input), part2: part2(input) });
 }

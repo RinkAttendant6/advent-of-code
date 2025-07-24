@@ -1,8 +1,7 @@
-import rawInput from '#inputs/2016/3.txt' with { type: 'text' };
-
-const input = rawInput.split('\n').map((line) =>
-    line.trim().split(/\s+/).map(Number)
-) as [number, number, number][];
+const normalizeInput = (rawInput: string): [number, number, number][] =>
+    rawInput.split('\n').map((line) =>
+        line.trim().split(/\s+/).map(Number)
+    ) as [number, number, number][];
 
 /**
  * Determine if three lengths are a valid triangle
@@ -12,9 +11,11 @@ const isTriangle = (x: number, y: number, z: number): boolean => {
     return nums[2] < nums[0] + nums[1];
 };
 
-export const part1 = input.filter((line) => isTriangle(...line)).length;
+export const part1 = (rawInput: string) =>
+    normalizeInput(rawInput).filter((line) => isTriangle(...line)).length;
 
-export const part2 = ((input) => {
+export const part2 = (rawInput: string) => {
+    const input = normalizeInput(rawInput);
     let result = 0;
 
     for (let row = 0; row < input.length; row += 3) {
@@ -32,8 +33,11 @@ export const part2 = ((input) => {
     }
 
     return result;
-})(input);
+};
 
 if (import.meta.main) {
-    console.log({ part1, part2 });
+    const input = await Deno.readTextFile(
+        Deno.args[0] ?? new URL('../../inputs/2016/3.txt', import.meta.url),
+    );
+    console.log({ part1: part1(input), part2: part2(input) });
 }
