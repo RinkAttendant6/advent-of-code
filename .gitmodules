@@ -1,0 +1,3 @@
+[submodule "inputs"]
+	path = inputs
+	url = https://github.com/RinkAttendant6/advent-of-code-input.git
