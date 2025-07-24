@@ -20,6 +20,15 @@
 
 	// Configure tool-specific properties.
 	"customizations": {
+		"codespaces": {
+			"repositories": {
+				"RinkAttendant6/advent-of-code-input": {
+					"permissions": {
+						"contents": "write"
+					}
+				}
+			}
+		},
 		"vscode": {
 			"extensions": [
 				"denoland.vscode-deno"
