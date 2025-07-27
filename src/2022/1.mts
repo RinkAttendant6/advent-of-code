@@ -1,15 +1,20 @@
-import fs from 'node:fs/promises';
+const totals = (input: string): number[] =>
+    input.split('\n\n').map((group) =>
+        group.split('\n').reduce((acc, x) => acc + Number(x), 0)
+    );
 
-const input = await fs.readFile('assets/day-1.txt', 'ascii');
+export const part1 = (input: string) => Math.max(...totals(input));
+export const part2 = (input: string) =>
+    totals(input)
+        .toSorted((a, b) => b - a)
+        .slice(0, 3)
+        .reduce((acc, x) => acc + x);
 
-const totals = input
-    .split('\n\n')
-    .map((group) => group.split('\n').reduce((acc, x) => acc + Number(x), 0));
-
-const part1 = Math.max(...totals);
-const part2 = totals
-    .sort((a, b) => b - a)
-    .slice(0, 3)
-    .reduce((acc, x) => acc + x);
-
-console.log({ part1, part2 });
+// deno-coverage-ignore-start
+if (import.meta.main) {
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/1.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
+    console.log({ part1: part1(input), part2: part2(input) });
+}
+// deno-coverage-ignore-stop

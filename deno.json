@@ -5,5 +5,8 @@
     "fmt": {
         "indentWidth": 4,
         "singleQuote": true
+    },
+    "imports": {
+        "node-dijkstra": "npm:node-dijkstra@^2.5.0"
     }
 }

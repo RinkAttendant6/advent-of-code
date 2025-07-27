@@ -1,71 +1,107 @@
-import fs from 'node:fs/promises';
 import Graph from 'node-dijkstra';
 
-const input = await fs.readFile('assets/day-12.txt', 'ascii');
+const normalizeInput = (rawInput: string) =>
+    rawInput
+        .split('\n')
+        .map((line) => line.split(''));
 
-const data = input
-    .trim()
-    .split('\n')
-    .map((line) => line.split``);
+const computeCellIndex = (grid: any[][], x: number, y: number) =>
+    y * grid[0].length + x;
 
-const mapWidth = data[0].length;
-const computeCellIndex = (x, y) => y * mapWidth + x;
+const getStartAndEnd = (grid: string[][]): [number, number] => {
+    let S = -1,
+        E = -1;
 
-let S = -1,
-    E = -1;
-
-for (let i = 0; i < data.length; i++) {
-    for (let j = 0; j < data[i].length; j++) {
-        if (data[i][j] === 'S') {
-            S = computeCellIndex(j, i);
-            data[i][j] = 'a';
-        } else if (data[i][j] === 'E') {
-            E = computeCellIndex(j, i);
-            data[i][j] = 'z';
+    for (let y = 0; y < grid.length; y++) {
+        for (let x = 0; x < grid[y].length; x++) {
+            if (grid[y][x] === 'S') {
+                S = computeCellIndex(grid, x, y);
+                grid[y][x] = 'a';
+            } else if (grid[y][x] === 'E') {
+                E = computeCellIndex(grid, x, y);
+                grid[y][x] = 'z';
+            }
         }
     }
-}
 
-const graph = new Graph();
+    return [S, E];
+};
 
-for (let i = 0; i < data.length; ++i) {
-    for (let j = 0; j < data[i].length; ++j) {
-        const currentCell = data[i][j];
-        const edges = new Map();
+const prepareGraph = (grid: string[][]) => {
+    const graph = new Graph();
 
-        for (let v = -1; v <= 1; ++v) {
-            for (let h = -1; h <= 1; ++h) {
-                if ((!h && v) || (!v && h)) {
-                    const cell = data[i + v]?.[j + h] ?? null;
+    for (let y = 0; y < grid.length; ++y) {
+        for (let x = 0; x < grid[y].length; ++x) {
+            const currentCell = grid[y][x];
+            const edges = new Map();
 
-                    if (cell?.charCodeAt() <= currentCell.charCodeAt() + 1) {
-                        edges.set(computeCellIndex(j + h, i + v), 1);
+            for (let dy = -1; dy <= 1; ++dy) {
+                for (let dx = -1; dx <= 1; ++dx) {
+                    if ((!dx && dy) || (!dy && dx)) {
+                        const cell = grid[y + dy]?.[x + dx] ?? null;
+
+                        if (
+                            cell?.charCodeAt(0) <= currentCell.charCodeAt(0) + 1
+                        ) {
+                            edges.set(
+                                computeCellIndex(grid, x + dx, y + dy),
+                                1,
+                            );
+                        }
                     }
                 }
             }
-        }
 
-        if (edges.size > 1) {
-            graph.addNode(computeCellIndex(j, i), edges);
-        }
-    }
-}
-
-const trails = [];
-for (let i = 0; i < data.length; i++) {
-    for (let j = 0; j < data[i].length; j++) {
-        if (data[i][j] !== 'a') {
-            continue;
-        }
-
-        const path = graph.path(computeCellIndex(j, i), E);
-        if (path !== null) {
-            trails.push(path);
+            if (edges.size > 1) {
+                graph.addNode(computeCellIndex(grid, x, y), edges);
+            }
         }
     }
+
+    return graph;
+};
+
+const findTrails = (grid: string[][], graph: Graph, end: number) => {
+    const trails = [];
+
+    for (let y = 0; y < grid.length; y++) {
+        for (let x = 0; x < grid[y].length; x++) {
+            if (grid[y][x] !== 'a') {
+                continue;
+            }
+
+            const path = graph.path(computeCellIndex(grid, x, y), end);
+            if (path !== null) {
+                trails.push(path);
+            }
+        }
+    }
+
+    return trails;
+};
+
+export const part1 = (input: string) => {
+    const grid = normalizeInput(input);
+    const [S, E] = getStartAndEnd(grid);
+    const graph = prepareGraph(grid);
+
+    return graph.path(S, E).length - 1;
+};
+
+export const part2 = (input: string) => {
+    const grid = normalizeInput(input);
+    const graph = prepareGraph(grid);
+    const [_, E] = getStartAndEnd(grid);
+    const trails = findTrails(grid, graph, E);
+
+    return Math.min(...trails.map((t) => t.length)) - 1;
+};
+
+// deno-coverage-ignore-start
+if (import.meta.main) {
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/12.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
+    console.log({ part1: part1(input), part2: part2(input) });
 }
-
-const part1 = graph.path(S, E).length - 1;
-const part2 = Math.min(...trails.map((t) => t.length)) - 1;
-
-console.log({ part1, part2 });
+// deno-coverage-ignore-stop

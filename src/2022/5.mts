@@ -1,37 +1,39 @@
-import fs from 'node:fs/promises';
+const normalizeInput = (rawInput: string): [string[][], string[]] => {
+    const [rawStacks, moves] = rawInput
+        .split('\n\n')
+        .map((group) => group.split('\n'));
 
-const input = await fs.readFile('assets/day-5.txt', 'ascii');
+    const numberOfStacks = Number(rawStacks.pop().match(/\d+\s*$/));
 
-const [rawStacks, moves] = input
-    .trim()
-    .split('\n\n')
-    .map((group) => group.split('\n'));
+    const stacks: string[][] = [[]];
 
-const numberOfStacks = Number(rawStacks.pop().match(/\d+\s*$/));
-
-const stacks = [[]];
-
-for (let i = 0; i < rawStacks.length; ++i) {
-    for (let j = 0; j < numberOfStacks; ++j) {
-        stacks[j + 1] ??= [];
-        if (rawStacks[i].at(4 * j + 1) !== ' ') {
-            stacks[j + 1].push(rawStacks[i].at(4 * j + 1));
+    for (let i = 0; i < rawStacks.length; ++i) {
+        for (let j = 0; j < numberOfStacks; ++j) {
+            stacks[j + 1] ??= [];
+            if (rawStacks[i].at(4 * j + 1) !== ' ') {
+                stacks[j + 1].push(rawStacks[i].at(4 * j + 1)!);
+            }
         }
     }
-}
+
+    return [stacks, moves];
+};
 
 /**
  * Move cargo around based on moves
- * @param {string[][]} cargo Array of stacks
- * @param {string[]} moves Array of moves
- * @param {boolean} inOrder
- * @returns {string[][]}
+ * @param cargo Array of stacks
+ * @param moves Array of moves
+ * @param inOrder
  */
-const moveCargo = (cargo, moves, inOrder = false) => {
+const moveCargo = (
+    cargo: string[][],
+    moves: string[],
+    inOrder: boolean = false,
+) => {
     const output = [...cargo];
 
     for (const line of moves) {
-        const [_, qty, src, dest] = line.split(/move | from | to /);
+        const [_, qty, src, dest] = line.split(/move | from | to /).map(Number);
         let t = output[src].slice(0, qty);
 
         if (!inOrder) {
@@ -47,12 +49,26 @@ const moveCargo = (cargo, moves, inOrder = false) => {
 
 /**
  * Get the top element of each stack
- * @param {string[][]} cargo Array of stacks
- * @returns {string}
+ * @param cargo Array of stacks
  */
-const getTopElements = (cargo) => cargo.map((stack) => stack[0] ?? '').join('');
+const getTopElements = (cargo: string[][]): string =>
+    cargo.map((stack) => stack[0] ?? '').join('');
 
-const part1 = getTopElements(moveCargo(stacks, moves));
-const part2 = getTopElements(moveCargo(stacks, moves, true));
+export const part1 = (input: string) => {
+    const [stacks, moves] = normalizeInput(input);
+    return getTopElements(moveCargo(stacks, moves));
+};
 
-console.log({ part1, part2 });
+export const part2 = (input: string) => {
+    const [stacks, moves] = normalizeInput(input);
+    return getTopElements(moveCargo(stacks, moves, true));
+};
+
+// deno-coverage-ignore-start
+if (import.meta.main) {
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/5.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
+    console.log({ part1: part1(input), part2: part2(input) });
+}
+// deno-coverage-ignore-stop

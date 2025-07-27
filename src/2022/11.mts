@@ -1,32 +1,36 @@
-import fs from 'node:fs/promises';
+type Monkey = {
+    items: number[];
+    operation: string;
+    test: number;
+    yes: number;
+    no: number;
+    count: number;
+};
 
-const input = await fs.readFile('assets/day-11.txt', 'ascii');
+const normalizeInput = (rawInput: string): Monkey[] =>
+    rawInput.split('\n\n').map((group) => {
+        const { items, operation, test, t, f } = group.match(
+            /\s*Starting items: (?<items>.+)\n\s*Operation: new = (?<operation>.+)\n\s*Test: divisible by (?<test>\d+)\n\s*If true: throw to monkey (?<t>\d+)\n\s*If false: throw to monkey (?<f>\d+)/,
+        )!.groups;
 
-const data = input.trim().split('\n\n');
-
-const monkeys = data.map((group) => {
-    const { items, operation, test, t, f } = group.match(
-        /\s*Starting items: (?<items>.+)\n\s*Operation: new = (?<operation>.+)\n\s*Test: divisible by (?<test>\d+)\n\s*If true: throw to monkey (?<t>\d+)\n\s*If false: throw to monkey (?<f>\d+)/
-    ).groups;
-
-    return {
-        items: items.split(', ').map(Number),
-        operation: operation,
-        test: Number(test),
-        yes: Number(t),
-        no: Number(f),
-        count: 0,
-    };
-});
+        return {
+            items: items.split(', ').map(Number),
+            operation: operation,
+            test: Number(test),
+            yes: Number(t),
+            no: Number(f),
+            count: 0,
+        };
+    });
 
 /**
  * Play keep away
- * @param {{items: number[], operation: string, test: number, yes: number, no: number, count: number}[]} monkeys
- * @param {number} rounds
- * @param {number} divisor
- * @returns {number[]}
  */
-const keepAway = (monkeys, rounds, divisor = 1) => {
+const keepAway = (
+    monkeys: Monkey[],
+    rounds: number,
+    divisor: number = 1,
+): number[] => {
     const gcd = monkeys.reduce((acc, x) => x.test * acc, 1);
 
     for (let i = 0; i < rounds; ++i) {
@@ -35,8 +39,8 @@ const keepAway = (monkeys, rounds, divisor = 1) => {
 
             while (monkey.items.length) {
                 const old = monkey.items.shift();
-                const target =
-                    Math.floor(eval(monkey.operation) / divisor) % gcd;
+                const target = Math.floor(eval(monkey.operation) / divisor) %
+                    gcd;
 
                 monkeys[
                     monkey[target % monkey.test === 0 ? 'yes' : 'no']
@@ -50,16 +54,24 @@ const keepAway = (monkeys, rounds, divisor = 1) => {
 
 /**
  * Determine monkey business value
- * @param {number[]} counts
- * @returns {number}
  */
-const monkeyBusiness = (counts) =>
+const monkeyBusiness = (counts: number[]): number =>
     counts
-        .sort((a, b) => b - a)
+        .toSorted((a, b) => b - a)
         .slice(0, 2)
         .reduce((a, c) => a * c);
 
-const part1 = monkeyBusiness(keepAway(structuredClone(monkeys), 20, 3));
-const part2 = monkeyBusiness(keepAway(structuredClone(monkeys), 10000));
+export const part1 = (input: string) =>
+    monkeyBusiness(keepAway(normalizeInput(input), 20, 3));
 
-console.log({ part1, part2 });
+export const part2 = (input: string) =>
+    monkeyBusiness(keepAway(normalizeInput(input), 10000));
+
+// deno-coverage-ignore-start
+if (import.meta.main) {
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/11.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
+    console.log({ part1: part1(input), part2: part2(input) });
+}
+// deno-coverage-ignore-stop

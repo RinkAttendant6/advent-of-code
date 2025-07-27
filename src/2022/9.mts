@@ -1,14 +1,14 @@
-import fs from 'node:fs/promises';
+import { Dir } from 'node:fs';
 
-const input = await fs.readFile('assets/day-9.txt', 'ascii');
+type Direction = 'L' | 'R' | 'U' | 'D';
 
-const data = input
-    .trim()
-    .split('\n')
-    .map((line) => line.split(` `));
+const normalizeInput = (rawInput: string): [Direction, string][] =>
+    rawInput
+        .split('\n')
+        .map((line) => line.split(` `) as [Direction, string]);
 
-const follow = (tailSegments) => {
-    const movement = {
+const follow = (data: [Direction, string][], tailSegments: number) => {
+    const movement: Record<Direction, [number, number]> = {
         L: [-1, 0],
         R: [1, 0],
         U: [0, 1],
@@ -19,7 +19,7 @@ const follow = (tailSegments) => {
     const visits = new Set();
 
     for (const [direction, steps] of data) {
-        for (let i = 0; i < steps; ++i) {
+        for (let i = 0; i < Number(steps); ++i) {
             rope[0][0] += movement[direction][0];
             rope[0][1] += movement[direction][1];
 
@@ -42,7 +42,14 @@ const follow = (tailSegments) => {
     return visits.size;
 };
 
-const part1 = follow(1);
-const part2 = follow(9);
+export const part1 = (input: string) => follow(normalizeInput(input), 1);
+export const part2 = (input: string) => follow(normalizeInput(input), 9);
 
-console.log({ part1, part2 });
+// deno-coverage-ignore-start
+if (import.meta.main) {
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/9.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
+    console.log({ part1: part1(input), part2: part2(input) });
+}
+// deno-coverage-ignore-stop

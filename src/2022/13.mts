@@ -1,25 +1,21 @@
-import fs from 'node:fs/promises';
-
-const input = await fs.readFile('assets/day-13.txt', 'ascii');
-
-const data = input
-    .trim()
-    .split(`\n\n`)
-    .map((line) => line.split(`\n`).map((x) => JSON.parse(x)));
+// deno-lint-ignore no-explicit-any
+const normalizeInput = (rawInput: string): any[][] =>
+    rawInput.split(`\n\n`)
+        .map((line) => line.split(`\n`).map((x) => JSON.parse(x)));
 
 /**
  * Compare items
- * @param {number|number[]|undefined} left
- * @param {number|number[]|undefined} right
- * @returns {boolean|null}
  */
-const compare = (left, right) => {
+const compare = (
+    left: number | number[] | undefined,
+    right: number | number[] | undefined,
+): boolean | null => {
     if (Number.isInteger(left) && Number.isInteger(right)) {
-        if (left < right) {
+        if (left! < right!) {
             return true;
         }
 
-        if (left > right) {
+        if (left! > right!) {
             return false;
         }
 
@@ -47,27 +43,39 @@ const compare = (left, right) => {
     }
 
     if (Number.isInteger(left) && Array.isArray(right)) {
-        return compare([left], right);
+        return compare([left as number], right);
     }
 
     if (Array.isArray(left) && Number.isInteger(right)) {
-        return compare(left, [right]);
+        return compare(left, [right as number]);
     }
 
     return null;
 };
 
-const part1 = data.reduce(
-    (acc, [left, right], idx) => (compare(left, right) ? acc + idx + 1 : acc),
-    0
-);
+export const part1 = (input: string) =>
+    normalizeInput(input).reduce(
+        (
+            acc,
+            [left, right],
+            idx,
+        ) => (compare(left, right) ? acc + idx + 1 : acc),
+        0,
+    );
 
-const orderedData = [...data.flat(1), [[2]], [[6]]].sort((a, b) =>
-    compare(a, b) ? -1 : 1
-);
+export const part2 = (input: string) => {
+    const sortedData = [...normalizeInput(input).flat(1), [[2]], [[6]]]
+        .toSorted((a, b) => compare(a, b) ? -1 : 1);
 
-const part2 =
-    (orderedData.findIndex((x) => JSON.stringify(x) === '[[2]]') + 1) *
-    (orderedData.findIndex((x) => JSON.stringify(x) === '[[6]]') + 1);
+    return (sortedData.findIndex((x) => JSON.stringify(x) === '[[2]]') + 1) *
+        (sortedData.findIndex((x) => JSON.stringify(x) === '[[6]]') + 1);
+};
 
-console.log({ part1, part2 });
+// deno-coverage-ignore-start
+if (import.meta.main) {
+    const year = new URL(import.meta.url).pathname.split('/').at(-2);
+    const inputUrl = new URL(`../../inputs/${year}/13.txt`, import.meta.url);
+    const input = await Deno.readTextFile(Deno.args[0] ?? inputUrl);
+    console.log({ part1: part1(input), part2: part2(input) });
+}
+// deno-coverage-ignore-stop
